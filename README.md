@@ -1,4 +1,4 @@
-
+# 音乐播放器
 ## API
 ### 属性
 #### 1. audioObject
@@ -135,5 +135,4 @@ audioObject.onvolumechange = function(){
 - [MDN-Media_events](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Media_events)
 
 ## 主题下载
-
-<a class="attachment" href="/uploads/default/original/2X/8/89a444e2bf485fd8ea0b0aaa7af07ce9c5aefb57.psd">mini-player.psd</a> (861.2 KB)
+[mini-player.psd](http://jscode.me/uploads/default/original/2X/8/89a444e2bf485fd8ea0b0aaa7af07ce9c5aefb57.psd) (861.2 KB)
