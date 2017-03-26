@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>音乐播放器</title>
+  <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+
+
+.musicbox {
+  font-family: cursive,microsoft Yahei;
+  font-size: 16px;
+  color: #f06d6a;
+  border: 1px solid #76dba3;
+  width: 340px;
+  padding: 20px 20px 5px 20px;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1), 0px 2px 10px 0px rgba(0, 0, 0, 0.05);
+  -webkit-font-smoothing: antialiased;
+}
+
+.musicbox .control {
+  margin-top: 20px;
+  font-size: 22px;
+  color: #ee8a87;
+  float: left;
+}
+.musicbox .control .fa {
+  margin-right: 12px;
+  cursor: pointer;
+}
+.musicbox .control .fa.disable{
+  opacity: 0.3;
+}
+.musicbox .info {
+  margin-left: 120px;
+}
+.musicbox .info .title{
+  font-size: 18px;
+}
+.musicbox .info .auther{
+  font-size: 13px;
+}
+.musicbox .progress{
+  width: 260px;
+}
+.musicbox .progress .bar {
+  height: 3px;
+  margin-top: 5px;
+  background-color: rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+.musicbox .progress .progress-now{
+  background-color: #ee8a87;
+  height: 3px;
+  width: 0;
+  position: relative;
+}
+.musicbox .time{
+  text-align: right;
+}
+.musicbox:after,
+.musicbox .music:after
+{
+  content:'';
+  display: block;
+  clear: both;
+}
+  </style>
+</head>
+<body>
+  <div class="musicbox">
+    <div class="music">
+      <div class="control">
+        <span class="back"><i class="fa fa-step-backward"></i></span>
+        <span class="play"><i class="fa fa-pause"></i></span>
+        <span class="forward"><i class="fa fa-step-forward"></i></span>
+      </div>
+      <div class="info">
+        <div class="title">My song</div>
+        <div class="auther">ruoyu</div>
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="bar">
+        <div class="progress-total"></div>
+        <div class="progress-now"></div>
+      </div>
+
+      <div class="time">0:00</div>
+    </div>
+    
+  </div>
+  
+  <script>
+  var musicList = [
+  {
+    src: 'http://cloud.hunger-valley.com/music/ifyou.mp3',
+    title: 'IF YOU',
+    auther: 'Big Bang'
+  },
+  {
+    src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
+    title: '玫瑰',
+    auther: '贰佰'
+  }
+]
+
+var backBtn = document.querySelector('.musicbox .back')
+var playBtn = document.querySelector('.musicbox .play')
+var forwardBtn = document.querySelector('.musicbox .forward')
+var titleNode = document.querySelector('.musicbox .title')
+var authorNode = document.querySelector('.musicbox .auther')
+var timeNode = document.querySelector('.musicbox .time')
+var progressBarNode = document.querySelector('.musicbox .progress .bar')
+var progressNowNode = document.querySelector('.musicbox .progress-now')
+
+var music = new Audio()
+music.autoplay = true
+var musicIndex = 0
+
+loadMusic(musicList[musicIndex])
+
+playBtn.onclick = function(){
+ var icon = this.querySelector('.fa')
+ if(icon.classList.contains('fa-play')){
+   music.play()
+ }else{
+   music.pause()
+ }
+ icon.classList.toggle('fa-play')
+ icon.classList.toggle('fa-pause')
+}
+
+forwardBtn.onclick = loadNextMusic
+backBtn.onclick = loadLastMusic
+music.onended = loadNextMusic
+music.shouldUpdate = true
+music.ontimeupdate = function(){
+  var _this = this
+  if(_this.shouldUpdate) { 
+     updateProgress()
+     _this.shouldUpdate = false
+    setTimeout(function(){
+      _this.shouldUpdate = true
+    }, 1000)
+  }
+}
+progressBarNode.onclick = function(e){
+  var percent = e.offsetX/parseInt(getComputedStyle(this).width)
+  music.currentTime = percent * music.duration
+  progressNowNode.style.width = percent*100+"%"
+}
+
+
+
+
+function loadMusic(songObj){
+  music.src = songObj.src
+  titleNode.innerText = songObj.title
+  authorNode.innerText = songObj.auther
+}
+
+function loadNextMusic(){
+  musicIndex++
+  musicIndex = musicIndex%musicList.length
+  loadMusic(musicList[musicIndex])  
+}
+
+function loadLastMusic(){
+  musicIndex--
+  musicIndex = (musicIndex + musicList.length)%musicList.length
+  loadMusic(musicList[musicIndex])  
+}
+
+function updateProgress(){
+  var percent = (music.currentTime/music.duration)*100+'%'
+  progressNowNode.style.width = percent
+  
+  var minutes = parseInt(music.currentTime/60)
+  var seconds = parseInt(music.currentTime%60)+''
+  seconds = seconds.length == 2? seconds : '0'+seconds
+  timeNode.innerText = minutes + ':' + seconds
+}
+
+
+  </script>
+</body>
+</html>
