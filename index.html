@@ -113,7 +113,8 @@
     }]
 
     /*
-        function Player(musicList){
+        function Player(ct, musicList){
+          this.ct = ct
           this.musicList = musicList
           this.init()
           this.bind()
@@ -135,7 +136,7 @@
         new Player(musicList)
     */
 
-
+  /*
     var musicList = [{
         src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
         title: '玫瑰',
@@ -147,6 +148,7 @@
       }
 
     ]
+    */
 
     var backBtn = document.querySelector('.musicbox .back')
     var playBtn = document.querySelector('.musicbox .play')
@@ -162,7 +164,10 @@
     music.autoplay = true
     var musicIndex = 0
 
-    loadMusic(musicList[musicIndex])
+    getMusic(function(musicList){
+      loadMusic(musicList[musicIndex])
+    })
+    
 
     playBtn.onclick = function() {
       var icon = this.querySelector('.fa')
@@ -238,6 +243,17 @@
       var seconds = parseInt(music.currentTime % 60) + ''
       seconds = seconds.length == 2 ? seconds : '0' + seconds
       timeNode.innerText = minutes + ':' + seconds
+    }
+
+    function getMusic(callback) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('get', 'music.json', true)
+      xhr.send()
+      xhr.onload = function() {
+        if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+          callback(JSON.parse(xhr.responseText))
+        }
+      }
     }
   </script>
 </body>
