@@ -6,17 +6,39 @@
   <title>音乐播放器</title>
   <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      height: 100vh;
+    }
+    .cover{
+      position: absolute;
+      content:'';
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: url(http://cloud.hunger-valley.com/17-9-22/87786461.jpg)  center center no-repeat;
+      background-size: cover;
+      filter: blur(5px);
+    }
     .musicbox {
-      font-family: cursive, microsoft Yahei;
+      position: absolute;
+      left: 50%;
+      top: 40%;
+      transform: translate(-50%, -50%);
+      font-family: cursive;
       font-size: 16px;
       color: #f06d6a;
-      border: 1px solid #76dba3;
       width: 340px;
+    }
+    .music-panel {
+      border: 1px solid #76dba3;
       padding: 20px 20px 5px 20px;
       box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1), 0px 2px 10px 0px rgba(0, 0, 0, 0.05);
-      -webkit-font-smoothing: antialiased;
-    }
-    
+      background-color: rgba(255, 255, 255, 0.9);
+    }    
     .musicbox .control {
       margin-top: 20px;
       font-size: 22px;
@@ -73,44 +95,77 @@
       display: block;
       clear: both;
     }
+
+    .musicbox .list{
+      list-style: none;
+    }
+    .musicbox .list>li{
+      position: relative;
+      padding: 4px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-top: none;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .musicbox .list>li:hover {
+      background-color: rgba(255,255, 255,0.5);
+    }
+    .musicbox .list>li.playing:before{
+      position: absolute;
+      top: 0;
+      left: 0;
+      content:'';
+      display: inline-block;
+      width: 8px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.8);
+    }
   </style>
 </head>
 
 <body>
+  <div class="cover"></div>
   <div class="musicbox">
-    <div class="music">
-      <div class="control">
-        <span class="back"><i class="fa fa-step-backward"></i></span>
-        <span class="play"><i class="fa fa-pause"></i></span>
-        <span class="forward"><i class="fa fa-step-forward"></i></span>
-      </div>
-      <div class="info">
-        <div class="title">My song</div>
-        <div class="auther">ruoyu</div>
-      </div>
-    </div>
-
-    <div class="progress">
-      <div class="bar">
-        <div class="progress-total"></div>
-        <div class="progress-now"></div>
+    <div class="music-panel">
+      <div class="music">
+        <div class="control">
+          <span class="back"><i class="fa fa-step-backward"></i></span>
+          <span class="play"><i class="fa fa-pause"></i></span>
+          <span class="forward"><i class="fa fa-step-forward"></i></span>
+        </div>
+        <div class="info">
+          <div class="title">My song</div>
+          <div class="auther">ruoyu</div>
+        </div>
       </div>
 
-      <div class="time">0:00</div>
+      <div class="progress">
+        <div class="bar">
+          <div class="progress-total"></div>
+          <div class="progress-now"></div>
+        </div>
+        <div class="time">0:00</div>
+      </div>      
     </div>
+    <ul class="list">
+      <!-- <li>贰佰-玫瑰 <i class="fa fa-play"></i></li> -->
+    </ul>
 
   </div>
 
+
   <script>
-    var musicList = [{
-      src: 'http://cloud.hunger-valley.com/music/ifyou.mp3',
-      title: 'IF YOU',
-      auther: 'Big Bang'
-    }, {
-      src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
-      title: '玫瑰',
-      auther: '贰佰'
-    }]
+    // var musicList = [{
+    //   src: 'http://cloud.hunger-valley.com/music/ifyou.mp3',
+    //   title: 'IF YOU',
+    //   auther: 'Big Bang',
+    //   img: 'http://cloud.hunger-valley.com/17-9-22/87786461.jpg'
+    // }, {
+    //   src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
+    //   title: '玫瑰',
+    //   auther: '贰佰',
+    //   img: 'http://cloud.hunger-valley.com/17-9-22/28212907.jpg'
+    // }]
 
     /*
         function Player(ct, musicList){
@@ -150,6 +205,7 @@
     ]
     */
 
+    var cover = document.querySelector('.cover')
     var backBtn = document.querySelector('.musicbox .back')
     var playBtn = document.querySelector('.musicbox .play')
     var forwardBtn = document.querySelector('.musicbox .forward')
@@ -158,14 +214,18 @@
     var timeNode = document.querySelector('.musicbox .time')
     var progressBarNode = document.querySelector('.musicbox .progress .bar')
     var progressNowNode = document.querySelector('.musicbox .progress-now')
+    var musicListContainer = document.querySelector('.musicbox .list')
     var timer
+    var musicList
 
     var music = new Audio()
     music.autoplay = true
     var musicIndex = 0
 
-    getMusic(function(musicList){
-      loadMusic(musicList[musicIndex])
+    getMusic(function(list){
+      musicList = list
+      setPlaylist(list)
+      loadMusic(list[musicIndex])
     })
     
 
@@ -196,31 +256,49 @@
         console.log('pause')
         clearInterval(timer)
       }
-      /*
-      music.ontimeupdate = function(){
-        var _this = this
-        if(_this.shouldUpdate) { 
-           updateProgress()
-           _this.shouldUpdate = false
-          setTimeout(function(){
-            _this.shouldUpdate = true
-          }, 1000)
-        }
-      }
-      */
+
+    music.ontimeupdate = updateProgress
+
     progressBarNode.onclick = function(e) {
       var percent = e.offsetX / parseInt(getComputedStyle(this).width)
       music.currentTime = percent * music.duration
       progressNowNode.style.width = percent * 100 + "%"
     }
 
+    musicListContainer.onclick = function(e){
+      if(e.target.tagName.toLowerCase() === 'li'){
+        for(var i = 0; i < this.children.length; i++){
+          if(this.children[i] === e.target){
+            musicIndex = i
+          }
+        }
+        console.log(musicIndex)
+        loadMusic(musicList[musicIndex])
+      }
+    }
+    //fa-li fa fa-spinner fa-spin
 
 
+    function setPlaylist(musiclist){
+      var container = document.createDocumentFragment()
+      musiclist.forEach(function(musicObj){
+        var node = document.createElement('li')
+        node.innerText = musicObj.auther + '-' + musicObj.title
+        console.log(node)
+        container.appendChild(node)
+      })
+      musicListContainer.appendChild(container)
+    }
 
     function loadMusic(songObj) {
       music.src = songObj.src
       titleNode.innerText = songObj.title
       authorNode.innerText = songObj.auther
+      cover.style.backgroundImage = 'url(' + songObj.img + ')'
+      for(var i = 0; i < musicListContainer.children.length; i++){
+        musicListContainer.children[i].classList.remove('playing')
+      }
+      musicListContainer.children[musicIndex].classList.add('playing')
     }
 
     function loadNextMusic() {
