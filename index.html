@@ -148,62 +148,126 @@
       </div>      
     </div>
     <ul class="list">
-      <!-- <li>贰佰-玫瑰 <i class="fa fa-play"></i></li> -->
+      <!-- <li>贰佰-玫瑰</li> -->
     </ul>
 
   </div>
 
 
   <script>
-    // var musicList = [{
-    //   src: 'http://cloud.hunger-valley.com/music/ifyou.mp3',
-    //   title: 'IF YOU',
-    //   auther: 'Big Bang',
-    //   img: 'http://cloud.hunger-valley.com/17-9-22/87786461.jpg'
-    // }, {
-    //   src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
-    //   title: '玫瑰',
-    //   auther: '贰佰',
-    //   img: 'http://cloud.hunger-valley.com/17-9-22/28212907.jpg'
-    // }]
 
-    /*
-        function Player(ct, musicList){
-          this.ct = ct
-          this.musicList = musicList
-          this.init()
-          this.bind()
-          this.start()
-        }
+/*
+    var musicList = []
+    var currentIndex = 0
+    var clock
+    var audio = new Audio()
+    audio.autoplay = true
 
-        Player.prototype = {
-          init: function(){
+    getMusicList(function(list){
+      musicList = list
+      loadMusic(list[currentIndex])
+      generateList(list)
+    })
 
-          },
-          bind: function(){
 
-          },
-          start: function(){
 
-          }
-        }
+    audio.ontimeupdate = function(){
+      $('.musicbox .progress-now').style.width = (this.currentTime/this.duration)*100 + '%'
+    }
 
-        new Player(musicList)
-    */
+    audio.onplay = function(){
+      clock = setInterval(function(){
+        var min = Math.floor(audio.currentTime/60)
+        var sec = Math.floor(audio.currentTime)%60 + ''
+        sec = sec.length === 2? sec : '0' + sec
+        $('.musicbox .time').innerText = min + ':' + sec
+      }, 1000)
 
-  /*
-    var musicList = [{
-        src: 'http://cloud.hunger-valley.com/music/玫瑰.mp3',
-        title: '玫瑰',
-        auther: '贰佰'
-      }, {
-        src: 'http://cloud.hunger-valley.com/music/ifyou.mp3',
-        title: 'IF YOU',
-        auther: 'Big Bang'
+    }
+
+
+    audio.onpause = function(){
+      clearInterval(clock)
+    }
+    audio.onended = function(){
+      console.log('end')
+      currentIndex =  (++currentIndex)%musicList.length
+      loadMusic(musicList[currentIndex])   
+    }
+
+    $('.musicbox .play').onclick = function(){
+      if(audio.paused){
+        audio.play()
+        this.querySelector('.fa').classList.remove('fa-play')
+        this.querySelector('.fa').classList.add('fa-pause')
+      }else {
+        audio.pause()
+        this.querySelector('.fa').classList.add('fa-play')
+        this.querySelector('.fa').classList.remove('fa-pause')
       }
+    }
 
-    ]
-    */
+    $('.musicbox .forward').onclick = function(){
+      currentIndex =  (++currentIndex)%musicList.length
+      loadMusic(musicList[currentIndex])
+    }
+
+    $('.musicbox .back').onclick = function(){
+      currentIndex =  (musicList.length + --currentIndex)%musicList.length
+      loadMusic(musicList[currentIndex])
+    }
+
+    $('.musicbox .bar').onclick = function(e){
+      console.log(e)
+      var percent = e.offsetX / parseInt(getComputedStyle(this).width)
+      console.log(percent)
+      audio.currentTime = audio.duration * percent
+    }
+
+
+    function $(selector){
+      return document.querySelector(selector)
+    }
+
+    function getMusicList(callback){
+      var xhr = new XMLHttpRequest()
+      xhr.open('GET', '/music.json', true)
+      xhr.onload = function(){
+        if((xhr.status >=200 && xhr.status < 300) || xhr.status === 304){
+          callback(JSON.parse(this.responseText))
+        }else {
+          console.log('获取数据失败')
+        }
+      }
+      xhr.onerror = function(){
+        console.log('网络异常')
+      }
+      xhr.send()
+    }
+
+    function loadMusic(musicObj){
+      console.log('begin play ', musicObj)
+      $('.musicbox .title').innerText = musicObj.title
+      $('.musicbox .auther').innerText = musicObj.auther
+      $('.cover').style.backgroundImage = 'url(' + musicObj.img + ')'
+      audio.src = musicObj.src
+    }
+
+    function generateList(list){
+
+    }
+
+
+
+*/
+
+
+
+
+
+
+
+    
 
     var cover = document.querySelector('.cover')
     var backBtn = document.querySelector('.musicbox .back')
@@ -332,7 +396,7 @@
           callback(JSON.parse(xhr.responseText))
         }
       }
-    }
+    
   </script>
 </body>
 
